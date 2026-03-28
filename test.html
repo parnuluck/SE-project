@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<style>
+
+.table{
+width:120px;
+height:80px;
+margin:10px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+color:white;
+font-weight:bold;
+border-radius:10px;
+cursor:pointer;
+}
+
+.available{
+background:blue;
+}
+
+.reserved{
+background:red;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Restaurant Tables</h2>
+
+<button onclick="loadTables()">Load Tables</button>
+
+<div id="tables"></div>
+
+<script>
+
+function loadTables(){
+
+fetch("/tables")
+.then(res => res.json())
+.then(data => {
+
+    const container = document.getElementById("tables");
+    container.innerHTML = "";
+
+    data.forEach(t => {
+
+        const div = document.createElement("div");
+
+        div.classList.add("table");
+
+        if(t.status === "available"){
+            div.classList.add("available");
+        }else{
+            div.classList.add("reserved");
+        }
+
+        div.innerText = "Table " + t.number;
+
+        div.onclick = function(){
+            reserveTable(t.id);
+        };
+
+        container.appendChild(div);
+
+    });
+
+});
+
+}
+
+function reserveTable(id){
+
+fetch("/reserve",{
+    method:"POST",
+    headers:{
+        "Content-Type":"application/json"
+    },
+    body:JSON.stringify({id:id})
+})
+.then(res => res.json())
+.then(data => {
+    loadTables();
+});
+
+}
+
+</script>
+
+</body>
+</html>

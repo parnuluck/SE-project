@@ -8,7 +8,44 @@ let selectedTable = null;
 
 let colors = ["blue","purple","orange","pink","cyan","brown"];
 
-//header 
+
+// =========================
+// โหลดข้อมูลโต๊ะจาก backend
+// =========================
+
+function loadTables(){
+
+fetch("http://localhost:3000/tables")
+.then(res=>res.json())
+.then(data=>{
+
+    Object.keys(data).forEach(id=>{
+
+        tablePeople[id] = data[id];
+
+        const seat = document.querySelector(`[data-table="${id}"]`);
+
+        if(!seat) return;
+
+        const people = data[id];
+
+        if(people >= 6){
+            seat.classList.add("full");
+        }
+        else if(people > 0){
+            seat.classList.add("partial");
+        }
+
+    });
+
+});
+
+}
+
+
+// =========================
+// header
+// =========================
 
 let headerRow = document.createElement("div");
 headerRow.className = "row";
@@ -29,7 +66,9 @@ for(let i = 0; i < L.length; i++){
 tableArea.appendChild(headerRow);
 
 
-//170โต๊ะ
+// =========================
+// สร้าง 170 โต๊ะ
+// =========================
 
 for(let row = 1; row <= 10; row++){
 
@@ -57,8 +96,8 @@ for(let row = 1; row <= 10; row++){
             document.getElementById("tableNumber").innerText = seatId;
 
             let used = tablePeople[seatId] || 0;
-        
-            document.getElementById("seatCount").innerText = used;    
+
+            document.getElementById("seatCount").innerText = used;
 
             popup.style.display = "flex";
 
@@ -72,15 +111,19 @@ for(let row = 1; row <= 10; row++){
 }
 
 
-//cancel
+// =========================
+// cancel popup
+// =========================
 
 document.getElementById("cancelBtn").onclick = () => {
     popup.style.display = "none";
 };
 
 
+// =========================
+// confirm reserve
+// =========================
 
-//cf
 const confirmBtn = document.getElementById("confirmBtn");
 
 confirmBtn.onclick = () => {
@@ -97,71 +140,48 @@ confirmBtn.onclick = () => {
         return;
     }
 
-    if(tablePeople[selectedTable] + people > 6){
+    if((tablePeople[selectedTable] || 0) + people > 6){
         alert("Table capacity is 6");
         return;
     }
 
-    document.querySelectorAll(".seat").forEach(seat => {
-        if(seat.classList.contains("full")){
-                seat.style.pointerEvents = "none"
-                seat.style.opacity = "0.4"
-            }
-
-    })    
-
     if(!selectedTable) return;
 
-    if(!tablePeople[selectedTable]){
-        tablePeople[selectedTable] = 0;
-    }
+    fetch("http://localhost:3000/reserve",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            id:selectedTable,
+            people:people
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
 
-    tablePeople[selectedTable] += people;
-        document.getElementById("seatCount").innerText =
-    tablePeople[selectedTable];
+        tablePeople[selectedTable] = data.people;
 
-    const seat = document.querySelector(`[data-table="${selectedTable}"]`);
+        const seat = document.querySelector(`[data-table="${selectedTable}"]`);
 
+        if(data.people >= 6){
+            seat.classList.remove("partial");
+            seat.classList.add("full");
+        }
+        else{
+            seat.classList.add("partial");
+        }
 
-    //color of table
-    if(tablePeople[selectedTable] >= 6){
-
-        seat.classList.remove("partial");
-        seat.classList.add("full");
-
-    }
-    else{   
-
-        seat.classList.add("partial");
-
-    }
-
-  
-
-    if(!seat.querySelector(".peopleContainer")){
-        
-        const container = document.createElement("div");
-        container.className = "peopleContainer";
-        
-        seat.appendChild(container);
-    }
-
-    const container = seat.querySelector(".peopleContainer");
-//people
-
-    for(let i=0;i<people;i++){
-
-        const dot = document.createElement("div");
-        dot.className = "person";
-
-        dot.style.background = colors[Math.floor(Math.random()*colors.length)];
-
-        container.appendChild(dot);
-    }
+    });
 
     popup.style.display = "none";
 
 };
+
+
+// =========================
+// reservation mode
+// =========================
 
 let reservationMode = false;
 
@@ -180,3 +200,8 @@ document.getElementById("reservationBtn").onclick = () => {
     });
 
 };
+
+
+// โหลดสถานะโต๊ะตอนเปิดเว็บ
+loadTables();
+setInterval(loadTables,5000);
