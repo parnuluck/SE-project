@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Register</title>
+        <link rel="stylesheet" href="loginstyle.css">
+    </head>
+    <style>
+        .btn {
+            margin-top: 20px;
+        }
+    </style>
+    <body>
+        <div class="container">
+            <h1>Welcome!</h1>
+
+            <div class="tabs">
+                <span class="alt-tabs" onclick="goLogin()">Login</span> |
+                <span>Register</span>
+            </div>
+
+            <input type="text" class="input-box" placeholder="Username" id="username">
+            <div class="password-wrapper">
+                <input type="password" class="input-box" placeholder="Password" id="password">
+                <img src="eye-close.svg" id="eyeicon">
+            </div>
+            <div class="password-wrapper">
+                <input type="password" class="input-box" placeholder="Confirm Password" id="repassword">
+                <img src="eye-close.svg" id="eyeicon2">
+            </div>
+            <input type="email" class="input-box" placeholder="Email" id="email">
+
+            <button class="btn" onclick="register()">Register</button>
+        </div>
+    </body>
+
+    <script>
+        let eyeicon = document.getElementById("eyeicon");
+        let eyeicon2 = document.getElementById("eyeicon2");
+        let password = document.getElementById("password");
+        let repassword = document.getElementById("repassword");
+
+        eyeicon.addEventListener("click", function() {
+            if (password.type === "password") {
+                password.type = "text";
+                eyeicon.src = "eye-open.svg";
+            } else {
+                password.type = "password";
+                eyeicon.src = "eye-close.svg";
+            }
+        });
+        eyeicon2.addEventListener("click", function() {
+            if (repassword.type === "password") {
+                repassword.type = "text";
+                eyeicon2.src = "eye-open.svg";
+            } else {
+                repassword.type = "password";
+                eyeicon2.src = "eye-close.svg";
+            }
+        });
+
+        function goLogin() {
+            window.location.href = "login.html";
+        }
+
+        function register() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const repassword = document.getElementById("repassword").value;
+            const email = document.getElementById("email").value;
+            const checkemail = document.getElementById("email");
+            
+            if (!checkemail.checkValidity()) {
+                alert("รูปแบบอีเมลไม่ถูกต้อง");
+                return;
+            }
+            if (username == "" || password === "" || repassword == "" || email == "") {
+                alert("กรอกข้อมูลให้ครบ");
+                return;
+            }
+            if (password !== repassword) {
+                alert("รหัสผ่านไม่ตรงกัน");
+                return;
+            }
+
+            localStorage.setItem("username", username);
+            localStorage.setItem("password", password);
+            localStorage.setItem("email", email);
+
+            alert("สมัครสำเร็จ!");
+
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 500);
+        }
+        
+    </script>
+</html>
