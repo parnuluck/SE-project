@@ -19,24 +19,26 @@ fetch("http://localhost:3000/tables")
 .then(res=>res.json())
 .then(data=>{
 
-    Object.keys(data).forEach(id=>{
+Object.keys(data).forEach(id=>{
 
-        tablePeople[id] = data[id];
+const table = document.querySelector(`[data-table="${id}"]`);
 
-        const seat = document.querySelector(`[data-table="${id}"]`);
+if(!table) return;
 
-        if(!seat) return;
+const people = data[id].total || 0;
 
-        const people = data[id];
+table.classList.remove("partial","full");
 
-        if(people >= 6){
-            seat.classList.add("full");
-        }
-        else if(people > 0){
-            seat.classList.add("partial");
-        }
+if(people >= 6){
+table.classList.add("full");
+}
+else if(people > 0){
+table.classList.add("partial");
+}
 
-    });
+table.innerHTML = id;
+
+});
 
 });
 
@@ -70,6 +72,20 @@ tableArea.appendChild(headerRow);
 // สร้าง 170 โต๊ะ
 // =========================
 
+function getTableLabel(num){
+
+let label = "";
+
+while(num >= 0){
+label = String.fromCharCode((num % 26) + 65) + label;
+num = Math.floor(num / 26) - 1;
+}
+
+return label;
+
+}
+let tableIndex = 0;
+
 for(let row = 1; row <= 10; row++){
 
     const rowDiv = document.createElement("div");
@@ -81,23 +97,23 @@ for(let row = 1; row <= 10; row++){
 
     rowDiv.appendChild(number);
 
-    for(let seat = 1; seat <= 17; seat++){
+    for(let seat = 0; seat < 17; seat++){
 
         const seatDiv = document.createElement("div");
         seatDiv.className = "seat";
 
-        const seatId = L[seat-1] + row;
+        const letter = L[seat];   // A B C D ...
+        const seatId = letter + row;
+
         seatDiv.dataset.table = seatId;
+        seatDiv.innerText = seatId;
 
         seatDiv.addEventListener("click", () => {
 
             selectedTable = seatId;
 
             document.getElementById("tableNumber").innerText = seatId;
-
-            let used = tablePeople[seatId] || 0;
-
-            document.getElementById("seatCount").innerText = used;
+            document.getElementById("seatCount").innerText = "?";
 
             popup.style.display = "flex";
 
@@ -128,56 +144,78 @@ const confirmBtn = document.getElementById("confirmBtn");
 
 confirmBtn.onclick = () => {
 
-    const people = parseInt(document.getElementById("people").value);
+const people = parseInt(document.getElementById("people").value);
 
-    if(!people || people < 1){
-        alert("Please enter number of people");
-        return;
-    }
+if(!people || people <= 0){
+alert("Enter number of people");
+return;
+}
 
-    if(people > 6){
-        alert("Maximum 6 people per table");
-        return;
-    }
+fetch("http://localhost:3000/reserve",{
 
-    if((tablePeople[selectedTable] || 0) + people > 6){
-        alert("Table capacity is 6");
-        return;
-    }
+method:"POST",
 
-    if(!selectedTable) return;
+headers:{
+"Content-Type":"application/json"
+},
 
-    fetch("http://localhost:3000/reserve",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            id:selectedTable,
-            people:people
-        })
-    })
-    .then(res=>res.json())
-    .then(data=>{
+body:JSON.stringify({
+id:selectedTable,
+people:people,
+user:localStorage.getItem("username")
+})
 
-        tablePeople[selectedTable] = data.people;
+})
+.then(res=>res.json())
+.then(data=>{
 
-        const seat = document.querySelector(`[data-table="${selectedTable}"]`);
+if(data.success){
+popup.style.display = "none";
+loadTables();
+}
 
-        if(data.people >= 6){
-            seat.classList.remove("partial");
-            seat.classList.add("full");
-        }
-        else{
-            seat.classList.add("partial");
-        }
+else{
+alert(data.message);
 
-    });
+}
 
-    popup.style.display = "none";
+});
 
 };
 
+function leaveTable(){
+
+fetch("http://localhost:3000/leave",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+user:localStorage.getItem("username")
+})
+
+})
+.then(res=>res.json())
+.then(data=>{
+
+if(data.success){
+
+alert("Table is now free");
+
+loadTables();
+
+}else{
+
+alert("You don't have a table");
+
+}
+
+});
+
+}
 
 // =========================
 // reservation mode

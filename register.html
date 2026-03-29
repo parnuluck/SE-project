@@ -84,11 +84,27 @@
                 return;
             }
 
-            localStorage.setItem("username", username);
-            localStorage.setItem("password", password);
-            localStorage.setItem("email", email);
-
-            alert("สมัครสำเร็จ!");
+            fetch("http://localhost:3000/register",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    username:username,
+                    password:password,
+                    email:email
+                })
+            })
+                .then(res=>res.json())
+            .then(data=>{
+                if(data.success){
+                    alert("สมัครสำเร็จ!");
+                    window.location.href="login.html";
+                }
+                else{
+                    alert(data.message);
+                }
+            });
 
             setTimeout(() => {
                 window.location.href = "login.html";

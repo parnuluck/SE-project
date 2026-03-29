@@ -11,7 +11,41 @@
 
     <div class="topbar">
         <div class="title">Canteen Table Reservation</div>
-        <button class="login-btn">Login</button>
+        <button class="login-btn" id="loginBtn">Login</button>
+        <button onclick="leaveTable()">Finish / Leave Table</button>
+        <script>
+
+            function goLogin(){
+                window.location.href = "login.html";
+            }
+
+            function logout(){
+                localStorage.removeItem("username");
+                location.reload();
+            }
+
+            window.onload = function(){
+
+            const user = localStorage.getItem("username");
+            const btn = document.getElementById("loginBtn");
+
+            if(user){
+
+                btn.innerHTML = user + " ▼";
+
+                btn.onclick = function(){
+
+                if(confirm("Logout?")){
+                    logout();
+                }
+
+                };
+
+            }
+
+            };
+
+</script>
     </div>
 
     <div id="tableArea"></div>
@@ -54,5 +88,39 @@
 
     </div>
     <script src="table.js"></script>
+
+    <script>
+        if(!localStorage.getItem("username")){
+        window.location.href="login.html";
+        }
+    </script>
+
+    <script>function logout(){
+        localStorage.removeItem("username");
+        location.reload();
+        }
+
+        window.onload=function(){
+
+            const user=localStorage.getItem("username");
+            const btn=document.getElementById("loginBtn");
+
+            if(!user){
+                btn.innerText="Login";
+                btn.onclick=()=>{
+                    window.location.href="login.html";
+                }
+                return;
+            }
+
+            btn.innerText=user+" ▼";
+            btn.onclick=()=>{
+                if(confirm("Logout?")){
+                    logout();
+                }
+            }
+        }
+    </script>
+    
 </body>
 </html> 

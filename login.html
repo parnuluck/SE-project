@@ -1,67 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login</title>
-        <link rel="stylesheet" href="loginstyle.css">
-    </head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<link rel="stylesheet" href="loginstyle.css">
+</head>
 
-    <body>
-        <div class="container">
-            <h1>Welcome!</h1>
+<body>
 
-            <div class="tabs">
-                <span>Login</span> |
-                <span class="alt-tabs" onclick="goRegister()">Register</span>
-            </div>
+<div class="container">
 
-            <input type="text" class="input-box" placeholder="Username" id="username">
-            <div class="password-wrapper">
-                <input type="password" class="input-box" placeholder="Password" id="password">
-                <img src="eye-close.svg" id="eyeicon">
-            </div>
+<h1>Welcome!</h1>
 
-            <div class="forgot">forget password?</div>
+<div class="tabs">
+<span>Login</span> |
+<span class="alt-tabs" onclick="goRegister()">Register</span>
+</div>
 
-            <button class="btn" onclick="login()">Login</button>
+<input type="text" class="input-box" placeholder="Username" id="username">
 
-            <div class="signup" onclick="goRegister()">Don't have any account?</div>
-        </div>
-    </body>
+<div class="password-wrapper">
+<input type="password" class="input-box" placeholder="Password" id="password">
+<img src="eye-close.svg" id="eyeicon">
+</div>
 
-    <script>
-        let eyeicon = document.getElementById("eyeicon");
-        let password = document.getElementById("password");
+<div class="forgot">forget password?</div>
 
-        eyeicon.addEventListener("click", function() {
-            if (password.type === "password") {
-                password.type = "text";
-                eyeicon.src = "eye-open.svg";
-            } else {
-                password.type = "password";
-                eyeicon.src = "eye-close.svg";
-            }
-        });
+<button class="btn" onclick="login()">Login</button>
 
-        function goRegister() {
-            window.location.href = "register.html";
-        }
+<div class="signup" onclick="goRegister()">Don't have any account?</div>
 
-        function login() {
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const savedUser = localStorage.getItem("username");
-            const savedPass = localStorage.getItem("password");
-            if (username === savedUser && password === savedPass) {
-                alert("เข้าสู่ระบบสำเร็จ!");
-            } else {
-                alert("Username หรือ Password ไม่ถูกต้อง");
-            }
+</div>
 
-            /*setTimeout(() => {
-                window.location.href = "main.html";
-            }, 500);*/
-        }
-    </script>
+<script>
+
+// show / hide password
+let eyeicon = document.getElementById("eyeicon");
+let password = document.getElementById("password");
+
+eyeicon.addEventListener("click", function(){
+
+if(password.type === "password"){
+password.type="text";
+eyeicon.src="eye-open.svg";
+}else{
+password.type="password";
+eyeicon.src="eye-close.svg";
+}
+
+});
+
+// go register page
+function goRegister(){
+window.location.href="register.html";
+}
+
+// login with backend
+function login(){
+
+const username=document.getElementById("username").value;
+const password=document.getElementById("password").value;
+
+if(username=="" || password==""){
+alert("กรอกข้อมูลให้ครบ");
+return;
+}
+
+fetch("http://localhost:3000/login",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+username:username,
+password:password
+})
+
+})
+.then(res=>res.json())
+.then(data=>{
+
+if(data.success){
+
+localStorage.setItem("username",username);
+
+alert("เข้าสู่ระบบสำเร็จ");
+
+window.location.href="main.html";
+
+}else{
+
+alert("Username หรือ Password ไม่ถูกต้อง");
+
+}
+
+});
+
+}
+
+</script>
+
+</body>
 </html>
